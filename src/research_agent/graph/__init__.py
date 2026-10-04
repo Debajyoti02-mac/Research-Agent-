@@ -1,39 +1,23 @@
 from langgraph.graph import StateGraph , START , END 
-from typing import TypedDict
+from research_agent.state import Self
 # An academic Abstract is a concise, 200–250 word self-contained summary of the entire paper. It must cover four core elements 
 
 
-class Self(TypedDict):
-    query : str 
-    context : list[str]
-    grounded : bool 
-    answer : str 
-    needed_grounded : str 
-    retry : int 
-    topic: str
-    raw_notes: str
-    abstract: str
-    introduction : str
-    literature_review : str 
-    methodology: str 
-    results: str  
-    discussion: str    
-    references: str
     
 
 
 # Connection [create Node]
 Builder = StateGraph(Self)
 
-from retrival import Retrival_Fetch 
-from llm import LLM_connection 
-from greounded import Grounded , check_grounded
-from abstract import abstract_node
-from introduction import introduction_node 
-from literature import literature_review_node 
-from methodology import methodology_node 
-from result import results_node 
-from Discussion import discussion_node
+from research_agent.retrieval import Retrival_Fetch 
+from research_agent.llm import LLM_connection 
+from research_agent.grounded import Grounded , check_grounded
+from research_agent.nodes.abstract import abstract_node
+from research_agent.nodes.introduction import introduction_node 
+from research_agent.nodes.literature import literature_review_node 
+from research_agent.nodes.methodology import methodology_node 
+from research_agent.nodes.result import results_node 
+from research_agent.nodes.discussion import discussion_node
 # Connection [create Node]
 Builder.add_node('retrival',Retrival_Fetch)
 Builder.add_node('LLM',LLM_connection)

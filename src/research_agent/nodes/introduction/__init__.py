@@ -1,6 +1,6 @@
 ## Introduction Node
-from graph import Self
-from llm import LLM 
+from research_agent.state import Self
+from research_agent.llm import LLM 
 
 def introduction_node(state:Self)->dict:
     topic = state.get('topic','')

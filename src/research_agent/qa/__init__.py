@@ -1,9 +1,12 @@
-from retrival import Retrival_Fetch 
-from llm import LLM_connection 
-from greounded import Grounded , check_grounded
+from research_agent.retrieval import Retrival_Fetch 
+from research_agent.llm import LLM_connection 
+from research_agent.grounded import Grounded , check_grounded
 from langgraph.graph import START , StateGraph , END 
-from graph import Self
-# --- Q&A Only Graph ---
+from research_agent.state import Self
+
+def after_llm(state: Self):
+    return 'grounded' if state.get('relevant') else 'end'
+
 qa_builder = StateGraph(Self)
 qa_builder.add_node('retrival', Retrival_Fetch)
 qa_builder.add_node('LLM', LLM_connection)
@@ -11,10 +14,9 @@ qa_builder.add_node('grounded', Grounded)
 
 qa_builder.add_edge(START, 'retrival')
 qa_builder.add_edge('retrival', 'LLM')
-qa_builder.add_edge('LLM', 'grounded')
 qa_builder.add_conditional_edges(
-    'grounded', check_grounded,
-    {'end': END, 'retry': 'retrival'}
+    'LLM', after_llm,
+    {'grounded': 'grounded', 'end': END}
 )
 qa_graph = qa_builder.compile()
 

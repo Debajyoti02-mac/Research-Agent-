@@ -5,17 +5,17 @@ from sqlalchemy.orm import Session
 from slowapi import Limiter , _rate_limit_exceeded_handler 
 from slowapi.util import get_remote_address 
 from slowapi.errors import RateLimitExceeded
-from qus_ans import qa_graph
+from research_agent.qa import qa_graph
 
 REDIS_URL = "redis://localhost:6379"
-limiter = Limiter(key_func=_rate_limit_exceeded_handler , storage_uri=REDIS_URL)
+limiter = Limiter(key_func=get_remote_address , storage_uri=REDIS_URL)
 
 
 # Local application imports
-from database import get_db , PaperRun
-from security import senetize_input
-from graph import graph
-from pdf_engine import generate_paper_pdf
+from research_agent.database import get_db , PaperRun
+from research_agent.security import senetize_input
+from research_agent.graph import graph
+from research_agent.pdf_engine import generate_paper_pdf
 
 app = FastAPI(title="Research_agent")
 app.state.limiter = limiter 
@@ -29,7 +29,6 @@ class AskResponse(BaseModel):
     question: str
     answer: str
     grounded: bool
-    context: list[str]
 
 # That for only the Research Field 
 class ResearchRequest(BaseModel):
@@ -89,7 +88,7 @@ async def generate_paper(
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
 # Question answer function build ------------- 
-@app.post("/api/v1//ask",response_model=AskResponse,tags=["Q&A"])
+@app.post("/api/v1/ask",response_model=AskResponse,tags=["Q&A"])
 async def QuestionAnswering(response :Ask_Request , request : Request , db:Session = Depends(get_db)):
     client_ip = request.client.host if request.client else "unknown"
     
@@ -127,6 +126,5 @@ async def QuestionAnswering(response :Ask_Request , request : Request , db:Sessi
     return AskResponse(
         question=clean_question,
         answer=final_text,
-        grounded=result.get("grounded", False),
-        context=result.get("context", [])
+        grounded=result.get("grounded", False)
     )

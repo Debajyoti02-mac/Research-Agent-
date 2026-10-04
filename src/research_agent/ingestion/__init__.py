@@ -1,10 +1,11 @@
 ## Import warnings 
+from pathlib import Path
 import warnings 
 warnings.filterwarnings('ignore')
 
 # PDF loader 
 from langchain_community.document_loaders import PyPDFLoader 
-loader = PyPDFLoader('economics_research_reference.pdf')
+loader = PyPDFLoader(str(Path(__file__).resolve().parents[1] / 'economics_research_reference.pdf'))
 pages = loader.load()
 
 # Split data 

@@ -1,5 +1,5 @@
-from ingestion import chunks , collection
-from graph import Self
+from research_agent.ingestion import chunks , collection
+from research_agent.state import Self
 
 
 from rank_bm25 import BM25Okapi 
@@ -38,10 +38,11 @@ def Retrival_Fetch(state:Self):
         rrf_tokens[doc] = rrf_tokens.get(doc,0.0)+1.0/(rank+60) 
         
     marge = sorted(rrf_tokens.items(),key=lambda x:x[1],reverse=True)
-    
-    top_docs = [i for i , doc in marge[:5]] 
+    relevant = len(dense_chunks) > 0
+    top_docs = [i for i , doc in marge[:3]] if relevant else []
     retry_time = state.get('retry',0)
     return {
         'context':top_docs ,
-        'retry':retry_time+1
+        'retry':retry_time+1 ,
+        'relevant': relevant
     }
