@@ -1,32 +1,13 @@
-# Byte-code / cache
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Environments
 .env
 .venv/
-venv/
-ENV/
+__pycache__/
+*.pyc
 
-# Databases & local state
+# Local SQLite databases & vector store
 *.db
-*.sqlite3
+research_agent.db
+Vector_DataBase/
 dump.rdb
 
-# Generated outputs & uploads
+# Generated outputs
 *.pdf
-uploads/
-output/
-
-# IDE & Editor configs
-.vscode/
-.idea/
-*.swp
-
-# OS files
-.DS_Store
-Thumbs.db
-
-Vector_DataBase/
-chroma_db/
