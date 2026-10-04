@@ -11,3 +11,4 @@ dump.rdb
 
 # Generated outputs
 *.pdf
+.DS_Store
