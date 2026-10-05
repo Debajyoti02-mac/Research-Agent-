@@ -18,6 +18,11 @@ from research_agent.nodes.literature import literature_review_node
 from research_agent.nodes.methodology import methodology_node 
 from research_agent.nodes.result import results_node 
 from research_agent.nodes.discussion import discussion_node
+from research_agent.nodes.research import research_plan
+# Connection [create Node]
+# Connection [create Node]
+Builder = StateGraph(Self)
+
 # Connection [create Node]
 Builder.add_node('retrival',Retrival_Fetch)
 Builder.add_node('LLM',LLM_connection)
@@ -28,6 +33,7 @@ Builder.add_node("literature_review", literature_review_node)
 Builder.add_node("methodology", methodology_node)
 Builder.add_node("results", results_node)
 Builder.add_node("discussion", discussion_node)
+Builder.add_node('research',research_plan)
 
 
 # Create Edge 
@@ -37,10 +43,11 @@ Builder.add_edge('LLM','grounded')
 Builder.add_conditional_edges(
     'grounded',check_grounded,
     {
-        'end':'abstract' , 
+        'end':'research' , 
         'retry':'retrival'
     }
 )
+Builder.add_edge('research','abstract')
 Builder.add_edge('abstract' , 'introduction')
 Builder.add_edge('introduction','literature_review')
 Builder.add_edge('literature_review','methodology')
