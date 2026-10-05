@@ -22,8 +22,9 @@ BASE_DIR = Path(__file__).resolve().parents[3]
 INDEX_FILE = BASE_DIR / "index.html"
 
 
-REDIS_URL = os.getenv("REDIS_URL")
-limiter = Limiter(key_func=get_remote_address , storage_uri=REDIS_URL)
+# REDIS_URL = os.getenv("REDIS_URL")
+
+limiter = Limiter(key_func=get_remote_address )
 
 
 import logging 
