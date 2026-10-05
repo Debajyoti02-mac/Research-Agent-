@@ -1,17 +1,33 @@
-import os
 from datetime import datetime
+
 from sqlalchemy import Column, DateTime, Integer, String, Text, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
+
 DATABASE_URL = "sqlite:///./research_agent.db"
 
-engine = create_engine(url=DATABASE_URL,connect_args={"check_same_thread": False})
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"check_same_thread": False}
+)
 
-sessionlocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
 
-base = declarative_base()
+Base = declarative_base()
 
-class PaperRun(base):
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String, unique=True, nullable=False)
+    password_hash = Column(String, nullable=False)
+
+class PaperRun(Base):
     __tablename__ = "paper_runs"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -20,11 +36,14 @@ class PaperRun(base):
     timestamp = Column(DateTime, default=datetime.utcnow)
     status = Column(String(50), default="INITIATED")
     log_detail = Column(Text, default="")
-    
-base.metadata.create_all(bind=engine)
+
+
+Base.metadata.create_all(bind=engine)
+
 
 def get_db():
-    db = sessionlocal()
+    db = SessionLocal()
+
     try:
         yield db
     finally:

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Research Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fafafa; --surface:#fff; --ink:#111; --muted:#6b6b6b; --line:#e4e4e4;
+  --accent:#111; --accent-ink:#fff; --warn:#8a6420; --err:#b3261e; --ok:#2e6b4a;
+  --serif:"Newsreader",Georgia,"Times New Roman",serif;
+  --sans:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+:root[data-theme="dark"]{
+  --bg:#0e0e0e; --surface:#151515; --ink:#ededed; --muted:#8a8a8a; --line:#272727;
+  --accent:#ededed; --accent-ink:#0e0e0e; --warn:#d9b26a; --err:#ee7c7c; --ok:#7cc79b;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e0e0e; --surface:#151515; --ink:#ededed; --muted:#8a8a8a; --line:#272727;
+    --accent:#ededed; --accent-ink:#0e0e0e; --warn:#d9b26a; --err:#ee7c7c; --ok:#7cc79b;
+  }
+}
+*{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background-color:var(--bg);color:var(--ink);font:16px/1.55 var(--sans);
+  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  max-width:760px;margin:0 auto;padding:20px 16px 8px}
+h1{font:600 clamp(1.5rem,4vw,2rem)/1.1 var(--serif);margin:0;letter-spacing:-.01em}
+h2{font:600 1.35rem/1.2 var(--serif);margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 16px;font-size:.95rem}
+main{max-width:760px;margin:0 auto;padding:8px 16px 48px}
+.bar{display:flex;gap:8px;align-items:center}
+header.masthead{display:block;max-width:none;margin:0;padding:0}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;display:flex;align-items:center;
+  justify-content:space-between;gap:12px;padding:12px max(16px,calc((100% - 760px)/2));
+  background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font:600 1.05rem var(--serif)}
+.mark{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);
+  color:var(--accent-ink);font:600 1rem/1 var(--serif)}
+.hero{max-width:760px;margin:0 auto;padding:44px 16px 28px}
+h1{display:block;font:500 clamp(2.1rem,7vw,3.6rem)/1.04 var(--serif);letter-spacing:-.025em;margin:0}
+h1 em{font-style:italic;color:var(--muted)}
+.lede{color:var(--muted);max-width:52ch;margin:16px 0 0;font-size:1.05rem}
+.rule{height:1px;background:var(--ink);margin-top:28px;transform-origin:left;
+  animation:draw .9s cubic-bezier(.2,.7,.2,1) both}
+@keyframes draw{from{transform:scaleX(0)}}
+@media (prefers-reduced-motion:reduce){.rule{animation:none}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px}
+.tab{border-radius:6px 6px 0 0;transition:background .15s,color .15s}
+.tab:hover{background:color-mix(in srgb,var(--accent) 8%,transparent);color:var(--ink)}
+button.primary{transition:transform .15s,box-shadow .15s}
+button.primary:not([disabled]):hover{transform:translateY(-1px);box-shadow:0 6px 14px -6px var(--accent)}
+button.primary:not([disabled]):active{transform:none}
+input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent);outline:none}
+.chatbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.hist{list-style:none;margin:0 0 14px;padding:0;border:1px solid var(--line);border-radius:8px;max-height:240px;overflow:auto}
+.hist li{display:flex;align-items:center;border-bottom:1px solid var(--line)}
+.hist li:last-child{border-bottom:0}
+.hist li.active{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.hist .open{flex:1;min-width:0;text-align:left;background:none;border:0;color:var(--ink);font:inherit;padding:10px 12px;cursor:pointer}
+.hist .open span,.hist .open small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist .open small{color:var(--muted)}
+.hist .del{background:none;border:0;color:var(--err);font:500 .85rem var(--sans);padding:10px 12px;cursor:pointer}
+.hist .empty{display:block;padding:12px;color:var(--muted)}
+.turn{margin:0 0 20px;padding-left:16px;border-left:3px solid var(--accent)}
+.turn p{margin:6px 0 0;max-width:70ch;white-space:pre-wrap}
+.turn .tq{font-weight:600;margin-top:0}
+.turn .ta{font:1.05rem/1.7 var(--serif)}
+@media (max-width:480px){.card{padding:16px}}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.tab{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);
+  font:500 1rem var(--sans);padding:10px 14px;cursor:pointer;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+label{display:block;font-weight:500;margin:14px 0 6px}
+input,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);
+  border-radius:6px;padding:10px 12px}
+textarea{resize:vertical;min-height:110px}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hint{display:flex;justify-content:space-between;color:var(--muted);font-size:.85rem;margin-top:4px}
+button.primary{margin-top:18px;background:var(--accent);color:var(--accent-ink);border:0;border-radius:6px;
+  font:600 1rem var(--sans);padding:11px 18px;cursor:pointer;min-height:44px}
+button.primary[disabled]{opacity:.6;cursor:progress}
+button.ghost{background:none;border:1px solid var(--line);color:var(--ink);border-radius:6px;
+  font:500 .9rem var(--sans);padding:8px 12px;cursor:pointer;min-height:36px}
+.msg{margin-top:14px;font-size:.95rem}
+.msg.err{color:var(--err)} .msg.ok{color:var(--ok)}
+.answer{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.answer p{margin:8px 0 0;white-space:pre-wrap;max-width:70ch}
+.badge{display:inline-block;font-size:.85rem;font-weight:600;padding:2px 10px;border-radius:99px;border:1px solid currentColor}
+.badge.yes{color:var(--ok)} .badge.no{color:var(--warn)}
+.q{color:var(--muted);margin:0}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;
+  border-radius:50%;vertical-align:-2px;margin-right:8px;animation:s .8s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:2s}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="masthead">
+  <div class="topbar">
+  <div class="brand"><span class="mark" aria-hidden="true">R</span><span>Research Agent</span></div>
+  <div class="bar">
+    <button class="ghost" id="theme" type="button" aria-label="Toggle dark mode">Theme</button>
+    <button class="ghost" id="logout" type="button" hidden>Log out</button>
+  </div>
+  </div>
+  <div class="hero">
+    <h1>Draft research papers.<br><em>Question your documents.</em></h1>
+    <p class="lede">Generate a paper as a PDF, or ask questions and see whether each answer is grounded in your indexed documents.</p>
+    <div class="rule" aria-hidden="true"></div>
+  </div>
+</header>
+
+<main>
+  <!-- Auth -->
+  <section class="card" id="auth">
+    <div class="tabs" role="tablist" aria-label="Account">
+      <button class="tab" role="tab" id="t-login" aria-selected="true" data-mode="login">Log in</button>
+      <button class="tab" role="tab" id="t-register" aria-selected="false" data-mode="register">Register</button>
+    </div>
+    <form id="auth-form" novalidate>
+      <label for="username">Username</label>
+      <input id="username" autocomplete="username" required>
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+      <button class="primary" id="auth-btn" type="submit">Log in</button>
+      <div class="msg" id="auth-msg" role="status" aria-live="polite"></div>
+    </form>
+  </section>
+
+  <!-- App -->
+  <section class="card" id="app" hidden>
+    <div class="tabs" role="tablist" aria-label="Tools">
+      <button class="tab" role="tab" aria-selected="true" data-pane="paper">Generate paper</button>
+      <button class="tab" role="tab" aria-selected="false" data-pane="ask">Ask documents</button>
+    </div>
+
+    <div id="paper">
+      <h2>Generate a research paper</h2>
+      <p class="sub">Download the result as a PDF. Limit: 5 papers per minute.</p>
+      <form id="paper-form" novalidate>
+        <label for="topic">Topic</label>
+        <input id="topic" maxlength="300" required>
+        <div class="hint"><span></span><span id="topic-n">0 / 300</span></div>
+        <label for="notes">Notes (optional)</label>
+        <textarea id="notes" maxlength="15000" rows="7"></textarea>
+        <div class="hint"><span></span><span id="notes-n">0 / 15000</span></div>
+        <button class="primary" id="paper-btn" type="submit">Generate PDF</button>
+        <div class="msg" id="paper-msg" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+
+    <div id="ask" hidden>
+      <h2>Ask your documents</h2>
+      <p class="sub">Answers show whether they are grounded in the indexed documents.</p>
+      <div class="chatbar">
+        <button class="ghost" id="new-chat" type="button">New chat</button>
+        <button class="ghost" id="hist-btn" type="button" aria-expanded="false" aria-controls="hist">Previous chats</button>
+      </div>
+      <ul class="hist" id="hist" hidden></ul>
+      <div id="thread" aria-live="polite"></div>
+      <form id="ask-form" novalidate>
+        <label for="question">Question</label>
+        <textarea id="question" maxlength="500" rows="3" required></textarea>
+        <div class="hint"><span></span><span id="q-n">0 / 500</span></div>
+        <button class="primary" id="ask-btn" type="submit">Ask</button>
+        <div class="msg" id="ask-msg" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  // Same-origin by default. For a separate frontend host, set e.g. "http://localhost:8000".
+  var API = "";
+  var $ = function(id){return document.getElementById(id)};
+  var token = null, mode = "login";
+
+  function store(k,v){try{v===null?sessionStorage.removeItem(k):sessionStorage.setItem(k,v)}catch(e){}}
+  function load(k){try{return sessionStorage.getItem(k)}catch(e){return null}}
+
+  // Theme
+  var themeSaved = load("theme");
+  if(themeSaved) document.documentElement.dataset.theme = themeSaved;
+  $("theme").onclick = function(){
+    var cur = document.documentElement.dataset.theme ||
+      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var next = cur === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next; store("theme", next);
+  };
+
+  // Chats: kept in this browser, separated per user
+  var user = load("user") || "", chats = [], cur = null;
+  function ckey(){return "ra_chats_" + user}
+  function readChats(){try{return JSON.parse(localStorage.getItem(ckey()) || "[]")}catch(e){return []}}
+  function saveChats(){try{localStorage.setItem(ckey(), JSON.stringify(chats.slice(0,50)))}catch(e){}}
+  function newChat(){ cur = {id:Date.now(), title:"", ts:Date.now(), msgs:[]}; renderThread(); renderHist(); }
+  function renderThread(){
+    var t = $("thread"); t.textContent = "";
+    if(!cur.msgs.length){
+      var p = document.createElement("p"); p.className = "sub"; p.textContent = "Ask a question to start this chat.";
+      t.appendChild(p); return;
+    }
+    cur.msgs.forEach(function(m){
+      var d = document.createElement("div"); d.className = "turn";
+      var q = document.createElement("p"); q.className = "tq"; q.textContent = m.q;
+      var b = document.createElement("span"); b.className = "badge " + (m.g ? "yes" : "no");
+      b.textContent = m.g ? "Grounded in documents" : "Not grounded in documents";
+      var a = document.createElement("p"); a.className = "ta"; a.textContent = m.a;
+      d.append(q, b, a); t.appendChild(d);
+    });
+    t.lastElementChild.scrollIntoView({block:"nearest"});
+  }
+  function addTurn(q, a, g){
+    cur.msgs.push({q:q, a:a, g:g});
+    if(!cur.title) cur.title = q.slice(0,60);
+    cur.ts = Date.now();
+    chats = [cur].concat(chats.filter(function(c){return c.id !== cur.id}));
+    saveChats(); renderThread(); renderHist();
+  }
+  function renderHist(){
+    var ul = $("hist"); ul.textContent = "";
+    if(!chats.length){
+      var e = document.createElement("li"); e.className = "empty"; e.textContent = "No previous chats yet.";
+      ul.appendChild(e); return;
+    }
+    chats.forEach(function(c){
+      var li = document.createElement("li"); if(cur && c.id === cur.id) li.className = "active";
+      var o = document.createElement("button"); o.type = "button"; o.className = "open";
+      var s = document.createElement("span"); s.textContent = c.title;
+      var sm = document.createElement("small");
+      sm.textContent = new Date(c.ts).toLocaleString([], {dateStyle:"medium", timeStyle:"short"}) + ", " + c.msgs.length + (c.msgs.length === 1 ? " question" : " questions");
+      o.append(s, sm);
+      o.onclick = function(){ cur = c; renderThread(); renderHist(); showHist(false); };
+      var x = document.createElement("button"); x.type = "button"; x.className = "del"; x.textContent = "Delete";
+      x.setAttribute("aria-label", "Delete chat: " + c.title);
+      x.onclick = function(){
+        chats = chats.filter(function(k){return k.id !== c.id}); saveChats();
+        if(cur && cur.id === c.id) newChat(); else renderHist();
+      };
+      li.append(o, x); ul.appendChild(li);
+    });
+  }
+  function showHist(on){ $("hist").hidden = !on; $("hist-btn").setAttribute("aria-expanded", on); }
+  $("new-chat").onclick = function(){ newChat(); showHist(false); $("question").focus(); };
+  $("hist-btn").onclick = function(){ showHist($("hist").hidden); };
+
+  // View state
+  function render(){
+    var on = !!token;
+    $("auth").hidden = on; $("app").hidden = !on; $("logout").hidden = !on;
+    if(on){ chats = readChats(); newChat(); }
+  }
+  function logout(msg){
+    token = null; user = ""; store("token", null); store("user", null); render();
+    if(msg){ setMsg("auth-msg", msg, "err"); }
+  }
+  $("logout").onclick = function(){ logout(); };
+  token = load("token"); render();
+
+  function setMsg(id, text, kind){
+    var el = $(id); el.textContent = text || ""; el.className = "msg" + (kind ? " " + kind : "");
+  }
+  function busy(btn, on, label){
+    btn.disabled = on;
+    btn.innerHTML = on ? '<span class="spin"></span>' + label : "";
+    if(!on) btn.textContent = btn.dataset.label;
+  }
+  ["auth-btn","paper-btn","ask-btn"].forEach(function(id){ $(id).dataset.label = $(id).textContent; });
+
+  async function errorText(res){
+    if(res.status === 429) return "Rate limit reached. Wait a minute and try again.";
+    try{
+      var j = await res.json();
+      if(typeof j.detail === "string") return j.detail;
+      if(Array.isArray(j.detail)) return j.detail.map(function(d){return d.msg}).join("; ");
+    }catch(e){}
+    return "Request failed (" + res.status + ").";
+  }
+  function authFetch(path, opts){
+    opts = opts || {}; opts.headers = Object.assign({Authorization: "Bearer " + token}, opts.headers || {});
+    return fetch(API + path, opts).then(function(res){
+      if(res.status === 401){ logout("Session expired. Log in again."); throw new Error("auth"); }
+      return res;
+    });
+  }
+
+  // Auth tabs
+  document.querySelectorAll("[data-mode]").forEach(function(t){
+    t.onclick = function(){
+      mode = t.dataset.mode;
+      document.querySelectorAll("[data-mode]").forEach(function(x){x.setAttribute("aria-selected", x===t)});
+      $("auth-btn").dataset.label = mode === "login" ? "Log in" : "Create account";
+      $("auth-btn").textContent = $("auth-btn").dataset.label;
+      $("password").autocomplete = mode === "login" ? "current-password" : "new-password";
+      setMsg("auth-msg", "");
+    };
+  });
+
+  $("auth-form").onsubmit = async function(e){
+    e.preventDefault();
+    var u = $("username").value.trim(), p = $("password").value;
+    if(!u || !p){ setMsg("auth-msg", "Enter a username and password.", "err"); return; }
+    busy($("auth-btn"), true, mode === "login" ? "Logging in" : "Creating account");
+    setMsg("auth-msg", "");
+    try{
+      if(mode === "register"){
+        var r = await fetch(API + "/api/v1/auth/register", {
+          method:"POST", headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({username:u, password:p})
+        });
+        if(!r.ok){ setMsg("auth-msg", await errorText(r), "err"); return; }
+      }
+      var res = await fetch(API + "/api/v1/auth/login", {
+        method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        body: new URLSearchParams({username:u, password:p})
+      });
+      if(!res.ok){ setMsg("auth-msg", await errorText(res), "err"); return; }
+      token = (await res.json()).access_token; store("token", token);
+      user = u; store("user", u);
+      $("password").value = ""; render();
+    }catch(err){
+      setMsg("auth-msg", "Cannot reach the server.", "err");
+    }finally{ busy($("auth-btn"), false); }
+  };
+
+  // App tabs
+  document.querySelectorAll("[data-pane]").forEach(function(t){
+    t.onclick = function(){
+      document.querySelectorAll("[data-pane]").forEach(function(x){
+        x.setAttribute("aria-selected", x===t); $(x.dataset.pane).hidden = x!==t;
+      });
+    };
+  });
+
+  // Counters
+  [["topic","topic-n",300],["notes","notes-n",15000],["question","q-n",500]].forEach(function(c){
+    var el = $(c[0]), out = $(c[1]);
+    el.addEventListener("input", function(){ out.textContent = el.value.length + " / " + c[2]; });
+  });
+
+  // Generate paper
+  $("paper-form").onsubmit = async function(e){
+    e.preventDefault();
+    var topic = $("topic").value.trim();
+    if(!topic){ setMsg("paper-msg", "Enter a topic.", "err"); return; }
+    busy($("paper-btn"), true, "Generating (this can take a minute)");
+    setMsg("paper-msg", "");
+    try{
+      var res = await authFetch("/api/v1/generate-paper", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({topic: topic, raw_notes: $("notes").value})
+      });
+      if(!res.ok){ setMsg("paper-msg", await errorText(res), "err"); return; }
+      var blob = await res.blob();
+      var cd = res.headers.get("Content-Disposition") || "";
+      var m = /filename="?([^";]+)"?/.exec(cd);
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = m ? m[1] : "paper.pdf";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){URL.revokeObjectURL(a.href)}, 1000);
+      setMsg("paper-msg", "PDF downloaded.", "ok");
+    }catch(err){
+      if(err.message !== "auth") setMsg("paper-msg", "Cannot reach the server.", "err");
+    }finally{ busy($("paper-btn"), false); }
+  };
+
+  // Ask
+  $("ask-form").onsubmit = async function(e){
+    e.preventDefault();
+    var q = $("question").value.trim();
+    if(!q){ setMsg("ask-msg", "Enter a question.", "err"); return; }
+    busy($("ask-btn"), true, "Searching");
+    setMsg("ask-msg", "");
+    try{
+      var res = await authFetch("/api/v1/ask", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({question: q})
+      });
+      if(!res.ok){ setMsg("ask-msg", await errorText(res), "err"); return; }
+      var d = await res.json();
+      addTurn(d.question, d.answer, d.grounded);
+      $("question").value = ""; $("q-n").textContent = "0 / 500";
+    }catch(err){
+      if(err.message !== "auth") setMsg("ask-msg", "Cannot reach the server.", "err");
+    }finally{ busy($("ask-btn"), false); }
+  };
+})();
+</script>
+</body>
+</html>
