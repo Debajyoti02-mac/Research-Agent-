@@ -31,3 +31,4 @@ numexpr
 pwdlib[argon2]
 
 PyJWT
+Markdown
