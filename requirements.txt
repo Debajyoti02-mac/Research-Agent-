@@ -29,3 +29,5 @@ weasyprint
 duckduckgo-search
 numexpr
 pwdlib[argon2]
+
+PyJWT
