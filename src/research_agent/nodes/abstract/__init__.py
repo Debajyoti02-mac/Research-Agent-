@@ -6,22 +6,26 @@ from research_agent.security import scrub_output
 def abstract_node(state:Self):
     topic = state.get('topic',state.get('query',''))
     context = "\n".join(state.get("context", []))
-    raw_notes = state.get('raw_notes',"")
+    research_query = state.get('research_query')
     
-    prompt = f"""You are an academic researcher. Write a concise, formal academic abstract (200-250 words) based on the information below.
+    prompt = f"""
+Write the abstract for a research paper on:
 
-Topic: {topic}
-Key Notes / Methodology / Results: {raw_notes}
-Reference Context:
+Research Topic:
+{topic}
+
+Research Direction:
+{research_query}
+
+Use only the provided research evidence:
 {context}
 
-The abstract must include:
-1. Context & Research Problem (1-2 sentences)
-2. Proposed Methodology/Approach
-3. Key Findings/Outcomes (include specific metrics if available)
-4. Significance and Contribution
-
-Output only the final abstract text without any meta-commentary or markdown headers.
+Rules:
+- Stay strictly focused on the research topic.
+- Summarize the purpose, methodology, key findings, and significance.
+- Do not introduce unrelated subjects.
+- Do not invent facts or findings.
+- Keep it concise and academic.
 """
     response = LLM.invoke(prompt)
     return {"abstract": scrub_output(response.content.strip())}

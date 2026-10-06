@@ -11,7 +11,16 @@ def discussion_node(state: Self) -> dict:
 
     prompt = f"""You are an academic researcher writing the Discussion and Reference section of a research paper.
 
-Topic: {topic}
+RESEARCH TOPIC:
+{topic}
+
+IMPORTANT TOPIC RULES:
+- Stay strictly focused on the research topic above.
+- Every discussion point must directly relate to this topic.
+- Do not introduce unrelated subjects, examples, technologies, datasets, or concepts.
+- Use the methodology, results, and literature only to discuss this specific topic.
+- Do not allow information from the context to change or broaden the research topic.
+- Do not invent findings, causes, comparisons, or references.
 
 Methodology:
 {methodology}

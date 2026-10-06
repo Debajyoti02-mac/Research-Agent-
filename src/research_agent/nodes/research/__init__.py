@@ -1,24 +1,32 @@
-from research_agent.state import Self 
+from research_agent.state import Self
 from research_agent.llm import LLM
 
+
 def research_plan(state: Self):
+    topic = state.get("query", "").strip()
+
     prompt = f"""
 You are a research planning agent.
 
-Take the user's research topic and turn it into a clear,
-focused research direction for the research agent.
+Original Research Topic:
+{topic}
 
-Do not write the paper.
-Do not invent facts or sources.
+Your task is to convert the original topic into a concise,
+focused research direction for downstream research.
 
-Return only a concise research direction.
+Rules:
+- The original research topic is fixed.
+- Do not change, broaden, or replace the topic.
+- Keep the research direction directly related to the topic.
+- Identify the main scope, focus, and research angle.
+- Do not write the paper.
+- Do not invent facts, sources, findings, or statistics.
 
-User topic:
-{state['query']}
+Return ONLY the concise research direction.
 """
 
     result = LLM.invoke(prompt)
 
     return {
-        "research_query": result.content
+        "research_query": result.content.strip()
     }

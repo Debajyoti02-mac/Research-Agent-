@@ -18,3 +18,4 @@ class Self(TypedDict):
     discussion: str    
     references: str
     relevant : bool
+    research_query : str 
