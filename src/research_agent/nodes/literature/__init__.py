@@ -1,5 +1,5 @@
 from research_agent.state import Self
-from research_agent.llm import LLM 
+from research_agent.llm import LLM
 
 
 def literature_review_node(state: Self) -> dict:
@@ -7,40 +7,65 @@ def literature_review_node(state: Self) -> dict:
     intro = state.get("introduction", "")
     context = "\n".join(state.get("context", []))
 
-    prompt = f"""You are an academic researcher drafting the Literature Review section.
+    prompt = f"""
+You are an academic researcher drafting the Literature Review section
+of a research paper.
 
 RESEARCH TOPIC:
 {topic}
 
-INTRODUCTION & RESEARCH QUESTIONS:
+INTRODUCTION / RESEARCH QUESTIONS:
 {intro}
 
 REFERENCE CONTEXT / INGESTED SOURCES:
 {context}
 
-STRICT TOPIC RULES:
+STRICT TOPIC AND EVIDENCE RULES:
+
 - The RESEARCH TOPIC is fixed and must not be changed or broadened.
 - Discuss only literature directly relevant to the research topic.
-- Do not introduce unrelated subjects, technologies, datasets, or concepts.
-- Use the provided sources as evidence.
-- Do not invent studies, findings, benchmarks, or references.
-- If the provided sources do not contain enough evidence for a claim, do not fabricate it.
+- Use only the provided sources as evidence.
+- Do not invent authors, studies, findings, benchmarks, statistics,
+  citations, or references.
+- Do not use general knowledge to fill missing evidence.
+- If the provided sources do not contain enough evidence for a claim,
+  do not make that claim.
+- Do not introduce unrelated subjects, technologies, datasets,
+  methodologies, or concepts.
+- Preserve the terminology and research framing used by the provided sources.
+- Clearly distinguish established findings from proposed ideas.
+- Do not claim that a research finding exists unless it is supported
+  by the provided sources.
+- Do not write the research paper or methodology.
+- Do not mention that you are an AI.
+- Do not ask for additional information.
 
-Synthesize a structured Literature Review under these three subheadings:
+Write a structured and evidence-grounded Literature Review.
 
-1. Prior Work:
-   Group existing methodologies and dominant frameworks thematically.
+Structure it EXACTLY under these three subheadings:
 
-2. Discoveries & Benchmarks:
-   Highlight established findings, core breakthroughs, and standard baselines
-   relevant to the research topic.
+1. Prior Work
+Group the existing research and methodologies into relevant
+themes directly supported by the provided sources.
 
-3. Research Gap:
-   Explicitly contrast existing works against unresolved challenges,
-   operational bottlenecks, or missing methodologies that motivate this study.
+2. Discoveries & Benchmarks
+Summarize established findings, reported relationships,
+benchmarks, and important results only when explicitly supported
+by the provided sources.
 
-Maintain an objective, analytical academic style.
-Output only the section content with the subheadings above.
+3. Research Gap
+Identify limitations, unresolved problems, methodological gaps,
+or missing evidence that are explicitly supported by the provided
+sources.
+
+If the sources do not provide enough information for a subsection,
+state that the available evidence is insufficient rather than
+fabricating content.
+
+Maintain an objective, analytical, academic writing style.
+
+Output ONLY the Literature Review section with the three subheadings.
+Do not add explanations, comments, or meta-information.
 """
 
     response = LLM.invoke(prompt)

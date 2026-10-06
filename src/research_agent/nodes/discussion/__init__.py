@@ -1,53 +1,85 @@
 from research_agent.state import Self
-from research_agent.llm import LLM 
+from research_agent.llm import LLM
+
 
 def discussion_node(state: Self) -> dict:
     topic = state.get("query", "")
-    lit_review = state.get("literature_review", "")[:1200]
-    methodology = state.get("methodology", "")[:1500]
-    results = state.get("results", "")[:1200]
-    context_chunks = state.get("context", [])[:2]
+    lit_review = state.get("literature_review", "")
+    methodology = state.get("methodology", "")
+    results = state.get("results", "")
+    context_chunks = state.get("context", [])
+
     context = "\n".join(context_chunks)
 
-    prompt = f"""You are an academic researcher writing the Discussion and Reference section of a research paper.
+    prompt = f"""
+You are an academic researcher writing the Discussion section
+of a research paper.
 
 RESEARCH TOPIC:
 {topic}
 
-IMPORTANT TOPIC RULES:
-- Stay strictly focused on the research topic above.
-- Every discussion point must directly relate to this topic.
-- Do not introduce unrelated subjects, examples, technologies, datasets, or concepts.
-- Use the methodology, results, and literature only to discuss this specific topic.
-- Do not allow information from the context to change or broaden the research topic.
-- Do not invent findings, causes, comparisons, or references.
+LITERATURE REVIEW:
+{lit_review}
 
-Methodology:
+METHODOLOGY:
 {methodology}
 
-Results:
+RESULTS:
 {results}
 
-Prior Literature Context:
-{lit_review}
+REFERENCE CONTEXT:
 {context}
 
-Draft a comprehensive Discussion section structured strictly under these four subheadings:
-1. Interpretation of Results: Analyze the practical and mechanistic implications of the findings.
-2. Underlying Causes: Detail why the method succeeded or where performance trade-offs emerged.
-3. Literature Comparison: Contrast findings directly against prior benchmarks and baselines mentioned in the literature review.
-4. Limitations & Future Work: Detail specific constraints (e.g., compute, dataset boundaries) and future research avenues.
+STRICT TOPIC AND EVIDENCE RULES:
 
-Finally, compile a list of cited academic references (formal APA or IEEE style) derived from the reference context under the subheading:
-5. References
+- The RESEARCH TOPIC is fixed and must not be changed or broadened.
+- Every discussion point must directly relate to the research topic.
+- Use only the provided literature, methodology, results,
+  and reference context.
+- Do not invent findings, causes, comparisons, statistics,
+  benchmarks, or references.
+- Do not present expected or proposed results as actual findings.
+- If the RESULTS section contains no empirical findings,
+  explicitly acknowledge that limitation.
+- Do not claim that an experiment succeeded unless the results
+  provide evidence of success.
+- Do not introduce unrelated subjects, technologies, datasets,
+  or concepts.
+- Do not use outside knowledge to fill missing evidence.
+- Do not mention that you are an AI.
+- Do not ask for additional information.
 
-Maintain an analytical, critical academic tone. Output only the section content with the subheadings above.
+Write the Discussion section under EXACTLY these four subheadings:
+
+1. Interpretation of Results
+Interpret the actual findings provided in the Results section.
+If actual findings are unavailable, explain what can and cannot
+be concluded from the available evidence.
+
+2. Underlying Causes
+Discuss mechanisms or possible explanations only when they are
+supported by the provided evidence. Clearly distinguish evidence
+from interpretation.
+
+3. Literature Comparison
+Compare the reported findings with prior literature or benchmarks
+only when those comparisons are explicitly supported by the
+provided literature review or reference context.
+
+4. Limitations & Future Work
+Identify limitations supported by the research materials.
+Describe future research directions without presenting them
+as completed work.
+
+Maintain a critical, objective, academic tone.
+
+Output ONLY the Discussion section with the four subheadings.
+Do not generate a References section.
+Do not add explanations or meta-information.
 """
-    response = LLM.invoke(prompt)
-    output = response.content.strip()
 
-    # Split discussion and references if formatted separately, or store unified
+    response = LLM.invoke(prompt)
+
     return {
-        "discussion": output,
-        "references": output.split("5. References")[-1].strip() if "5. References" in output else ""
+        "discussion": response.content.strip()
     }

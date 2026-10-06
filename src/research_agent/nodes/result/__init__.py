@@ -8,7 +8,8 @@ def results_node(state: Self) -> dict:
     raw_notes = state.get("raw_notes", "")
     context = "\n".join(state.get("context", []))
 
-    prompt = f"""You are an academic researcher writing the Results section
+    prompt = f"""
+You are an academic researcher writing the Results section
 of a research paper.
 
 RESEARCH TOPIC:
@@ -20,39 +21,56 @@ METHODOLOGY & EXPERIMENTAL SETUP:
 USER'S EXPERIMENTAL NOTES / METRICS / RAW FINDINGS:
 {raw_notes}
 
-RELEVANT CONTEXT:
+RELEVANT RESEARCH CONTEXT:
 {context}
 
-STRICT RULES:
-- The research topic is fixed. Do not change or broaden it.
+STRICT TOPIC AND EVIDENCE RULES:
+
+- The RESEARCH TOPIC is fixed and must not be changed or broadened.
 - Report only findings directly related to the research topic.
-- Use only quantitative values explicitly provided in the
-  experimental notes, methodology, or relevant context.
-- NEVER invent numbers, metrics, benchmark scores, datasets,
-  experiments, or performance improvements.
-- If quantitative results are not provided, do not create them.
-- Clearly distinguish observed results from methodological details.
-- Do not explain why the results occurred. Save interpretation
-  and causal analysis for the Discussion section.
-- Do not introduce unrelated subjects or findings.
+- Use only evidence explicitly provided in the experimental notes,
+  methodology, or relevant research context.
+- NEVER invent numbers, metrics, datasets, experiments, observations,
+  benchmark scores, performance improvements, or statistical results.
+- Do not convert literature benchmarks into results produced by this study.
+- Do not convert evaluation targets into achieved results.
+- Do not treat proposed experiments as completed experiments.
+- Clearly distinguish actual observations from methodological descriptions.
+- Do not explain why a result occurred. Save interpretation,
+  causes, and implications for the Discussion section.
+- Do not introduce unrelated findings, technologies, datasets, or concepts.
+- Do not mention that you are an AI.
+- Do not ask for additional information.
 
-Draft a formal, objective Results section structured strictly
-under these two subheadings:
+IMPORTANT:
+If actual experimental findings are unavailable, explicitly state that
+the supplied material does not contain empirical results.
 
-1. Empirical Findings:
-   Present the available findings and observations systematically.
+If only some results are available:
+- Report only those results.
+- Do not fill the missing values.
+- Clearly identify which evaluation information is unavailable.
 
-2. Performance Metrics & Comparative Outcomes:
-   Present available quantitative measurements, comparison tables,
-   benchmark results, runtime, accuracy, error rates, or ablation
-   results ONLY when supported by the provided evidence.
+Write the Results section under EXACTLY these two subheadings:
 
-If no quantitative results are available, explicitly state that
-quantitative evaluation data were not provided rather than
-fabricating values.
+1. Empirical Findings
+Present the available experimental observations and findings
+in a clear and systematic manner.
 
-Maintain an unbiased, empirical academic tone.
-Output only the section content with the subheadings above.
+2. Performance Metrics & Comparative Outcomes
+Present quantitative measurements, benchmark comparisons,
+runtime, accuracy, error rates, ablation results, or other
+evaluation metrics ONLY when explicitly supported by the evidence.
+
+Do not interpret the results.
+Do not explain causes.
+Do not claim success or improvement unless explicitly demonstrated
+by the provided experimental evidence.
+
+Maintain an objective, empirical academic writing style.
+
+Output ONLY the Results section with the two subheadings.
+Do not add explanations, comments, or meta-information.
 """
 
     response = LLM.invoke(prompt)
