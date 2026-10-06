@@ -3,6 +3,7 @@ from research_agent.llm import LLM
 
 
 def research_plan(state: Self):
+
     topic = state.get("query", "").strip()
 
     prompt = f"""

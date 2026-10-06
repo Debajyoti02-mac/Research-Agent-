@@ -1,21 +1,22 @@
 from typing import TypedDict
 
 
-class Self(TypedDict):
-    query : str 
-    context : list[str]
-    grounded : bool 
-    answer : str 
-    needed_grounded : str 
-    retry : int 
-    topic: str
+class Self(TypedDict, total=False):
+    query: str
+    research_query: str
+    context: list[str]
+    sources: list[dict]
+    grounded: bool
+    relevant: bool
+    needed_grounded: str
+    retry: int
     raw_notes: str
+
     abstract: str
-    introduction : str
-    literature_review : str 
-    methodology: str 
-    results: str  
-    discussion: str    
+    introduction: str
+    literature_review: str
+    methodology: str
+    results: str
+    discussion: str
     references: str
-    relevant : bool
-    research_query : str 
+    answer: str

@@ -6,7 +6,6 @@ from research_agent.security import scrub_output
 def abstract_node(state: Self):
 
     topic = state.get("query", "").strip()
-
     research_query = state.get("research_query", "").strip()
 
     context = "\n".join(
